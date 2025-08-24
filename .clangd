@@ -9,4 +9,4 @@ CompileFlags:
     Remove:
         - -f*
     CompilationDatabase: ./build/Debug
-    Compiler: C:\Users\33533\.eide\tools\arm-gnu-toolchain-14.3.rel1-mingw-w64-i686-arm-none-eabi\bin\arm-none-eabi-g++.exe
+    Compiler: C:\Users\33533\.eide\tools\arm-gnu-toolchain-14.3.rel1-mingw-w64-i686-arm-none-eabi\bin\arm-none-eabi-gcc.exe
