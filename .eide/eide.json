@@ -36,12 +36,17 @@
         },
         "options": "null"
       },
-      "uploader": "OpenOCD",
+      "uploader": "JLink",
       "uploadConfig": {
         "bin": "",
-        "target": "stm32f4x",
-        "interface": "cmsis-dap-v1",
-        "baseAddr": "0x08000000"
+        "baseAddr": "",
+        "cpuInfo": {
+          "vendor": "ST",
+          "cpuName": "STM32F407IG"
+        },
+        "proType": 1,
+        "speed": 8000,
+        "otherCmds": ""
       },
       "uploadConfigMap": {
         "JLink": {
@@ -58,7 +63,7 @@
         "OpenOCD": {
           "bin": "",
           "target": "stm32f4x",
-          "interface": "cmsis-dap",
+          "interface": "cmsis-dap-v1",
           "baseAddr": "0x08000000"
         }
       },
