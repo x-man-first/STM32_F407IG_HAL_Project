@@ -19,6 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "ModeStateMechanic.h"
+#include "GPIO.h"
+#include "SystemClock.h"
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -31,7 +33,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-
+void MCU_Init(void);
+void MCU_Main(void);
 /* Private user code ---------------------------------------------------------*/
 
 /**
@@ -40,12 +43,34 @@
   */
 int main(void)
 {
-  ModeStateMechanic_Init();
+  MCU_Init();
   /* Infinite loop */
   while (1)
   {
-    ModeStateMechanic_Main();
+    MCU_Main();
   }
+}
+
+void MCU_Init(void)
+{
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* Configure the system clock */
+  SystemClock_Init();
+
+  /* Initialize all configured peripherals */
+  GPIO_Init();
+
+  ModeStateMechanic_Init();
+}
+
+void MCU_Main(void)
+{
+    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);
+    ModeStateMechanic_Main();
 }
 
 /**
