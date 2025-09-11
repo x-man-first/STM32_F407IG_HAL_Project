@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>STM32_F407IG_Led_Demo</name>
+	<name>STM32_F407IG_HAL_Project</name>
 	<comment></comment>
 	<projects>
 	</projects>

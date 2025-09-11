@@ -1,5 +1,5 @@
 {
-  "name": "STM32_F407IG_Led_Demo",
+  "name": "STM32_F407IG_HAL_Project",
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [
