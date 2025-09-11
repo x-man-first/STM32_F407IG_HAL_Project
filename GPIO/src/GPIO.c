@@ -32,7 +32,7 @@ static void GPIO_Cfg(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_SET);
 
   /*Configure GPIO pins : PE0 PE1 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
