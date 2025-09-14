@@ -5,9 +5,10 @@
   "srcDirs": [
     "Core",
     "Drivers",
-    "GPIO",
     "ModeStateMechanic",
-    "SystemClock"
+    "SystemClock",
+    "TIM2",
+    "GPIO"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
@@ -77,7 +78,8 @@
           "Drivers/CMSIS/Include",
           "ModeStateMechanic/include",
           "GPIO/include",
-          "SystemClock/include"
+          "SystemClock/include",
+          "TIM2/include"
         ],
         "libList": [],
         "defineList": [

@@ -21,6 +21,7 @@
 #include "ModeStateMechanic.h"
 #include "GPIO.h"
 #include "SystemClock.h"
+#include "TIM2.h"
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -35,6 +36,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void MCU_Init(void);
 void MCU_Main(void);
+
 /* Private user code ---------------------------------------------------------*/
 
 /**
@@ -87,7 +89,6 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
