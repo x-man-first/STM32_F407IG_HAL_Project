@@ -66,13 +66,41 @@ void MCU_Init(void)
   /* Initialize all configured peripherals */
   GPIO_Init();
 
+  MX_TIM2_Init();
+
   ModeStateMechanic_Init();
 }
 
 void MCU_Main(void)
 {
-    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);
-    ModeStateMechanic_Main();
+  if(Flag_1ms == 1)
+  {
+      Flag_1ms = 0; 
+
+      ModeStateMechanic_Main();
+  }
+  if(Flag_10ms == 1)
+  {
+      Flag_10ms = 0;
+  }
+  if(Flag_20ms == 1)
+  {
+      Flag_20ms = 0;
+  }
+  if(Flag_50ms == 1)
+  {
+      Flag_50ms = 0;
+  }
+  if(Flag_100ms == 1)
+  {
+      Flag_100ms = 0;
+  }
+  if(Flag_500ms == 1)
+  {
+      Flag_500ms = 0;
+      
+      HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);
+  }
 }
 
 /**
