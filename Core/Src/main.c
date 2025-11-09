@@ -99,7 +99,7 @@ void MCU_Main(void)
   {
       Flag_500ms = 0;
       
-      HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);
+      HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);//led toggle every 500ms
   }
 }
 
