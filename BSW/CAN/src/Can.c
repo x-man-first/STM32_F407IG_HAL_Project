@@ -4,9 +4,7 @@
 CAN_HandleTypeDef hcan1;
 
 //接收到的数据储存到下面的变量中
-volatile unsigned int CAN_RIxR;
-volatile unsigned int CAN_RDTxR;
-volatile unsigned int CAN_Data[2];
+volatile uint32_t CAN_Data[2];
 
 void CAN1_Init(void);
 void CAN1TX(void);
