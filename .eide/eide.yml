@@ -6,11 +6,8 @@ packDir: null
 srcDirs:
   - Core
   - Drivers
-  - ModeStateMechanic
-  - SystemClock
-  - TIM2
-  - GPIO
-  - CAN
+  - ASW
+  - BSW
 virtualFolder:
   name: <virtual_root>
   files: []
@@ -32,11 +29,11 @@ targets:
         - Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
         - Drivers/CMSIS/Device/ST/STM32F4xx/Include
         - Drivers/CMSIS/Include
-        - ModeStateMechanic/include
-        - GPIO/include
-        - SystemClock/include
-        - TIM2/include
-        - CAN/include
+        - ASW/ModeStateMechanic/include
+        - BSW/GPIO/include
+        - BSW/SystemClock/include
+        - BSW/TIM2/include
+        - BSW/CAN/include
       libList: []
     excludeList: []
     toolchain: GCC
