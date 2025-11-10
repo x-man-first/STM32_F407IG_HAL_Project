@@ -73,7 +73,7 @@ void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
-
+  HAL_TIM_Base_Start_IT(&htim2);
 }
 
 void TIM2_Value_Init(void)
@@ -133,4 +133,13 @@ void TIM2_Handler_IN_IRQ(void)
             counter_500ms = 0;
         }
 
+}
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim == (&htim2))
+  {
+    TIM2_Handler_IN_IRQ();
+  }
 }

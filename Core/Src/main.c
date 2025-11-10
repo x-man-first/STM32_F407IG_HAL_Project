@@ -22,22 +22,42 @@
 #include "GPIO.h"
 #include "SystemClock.h"
 #include "TIM2.h"
+#include "Can.h"
 
 /* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void MCU_Init(void);
 void MCU_Main(void);
 
 /* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -68,6 +88,8 @@ void MCU_Init(void)
 
   MX_TIM2_Init();
 
+  CAN1_Init();
+
   ModeStateMechanic_Init();
 }
 
@@ -94,6 +116,8 @@ void MCU_Main(void)
   if(Flag_100ms == 1)
   {
       Flag_100ms = 0;
+
+      CAN1TX();
   }
   if(Flag_500ms == 1)
   {

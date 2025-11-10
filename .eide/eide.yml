@@ -10,6 +10,7 @@ srcDirs:
   - SystemClock
   - TIM2
   - GPIO
+  - CAN
 virtualFolder:
   name: <virtual_root>
   files: []
@@ -35,6 +36,7 @@ targets:
         - GPIO/include
         - SystemClock/include
         - TIM2/include
+        - CAN/include
       libList: []
     excludeList: []
     toolchain: GCC
