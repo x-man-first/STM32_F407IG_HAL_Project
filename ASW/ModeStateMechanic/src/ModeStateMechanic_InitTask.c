@@ -70,7 +70,7 @@ void MM_DeInitPending_Test(void)
    if(1 == deinitStatus)
    {
       // Simulate successful deinitialization
-      MM_InitSts[MM_INIT_TEST] = MM_INIT_STS_DEINIT_COMPLETED;
+      MM_InitSts[MM_INIT_TEST] = MM_INIT_STS_DEINITIALIZED;
    } 
    else if(0u == MM_Test_DeInit_TimeoutCtr)
    {
@@ -137,6 +137,24 @@ void MM_InitDeinit(void)
             {
             /* Wait until deinitialization is finished */
               (*MM_InitCfg[i].DeInitPending)();
+              break;
+            }
+         case MM_INIT_STS_DEINIT_FAILED:
+            {
+              if(MM_InitReq == MM_INIT_REQ_INITIALIZE)
+              {
+                /* Start initializing the function */
+                (*MM_InitCfg[i].InitStart)();
+              }
+              else if(MM_InitReq == MM_INIT_REQ_DEINITIALIZE)
+              {
+                /* Start deinitializing the function */
+                (*MM_InitCfg[i].DeinitStart)();
+              }
+              else
+              {
+               /* Nothing to do */
+              }
               break;
             }
          default:

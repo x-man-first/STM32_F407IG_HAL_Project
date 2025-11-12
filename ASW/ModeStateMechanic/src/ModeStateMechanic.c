@@ -145,7 +145,9 @@ static void ModeStateMechanic_SpeedCtrlMode(void)
 static void ModeStateMechanic_PrpSleepMode(void)
 {
     MM_InitReq = MM_INIT_REQ_DEINITIALIZE;
-    if(MM_InitSts[MM_INIT_TEST] == MM_INIT_STS_DEINIT_COMPLETED)
+    MM_InitDeinit();
+
+    if(MM_InitSts[MM_INIT_TEST] == MM_INIT_STS_DEINITIALIZED)
     {
         ModeStateMechanic_ModeTransition(MM_SLEEP_MODE);
     }
@@ -161,7 +163,8 @@ static void ModeStateMechanic_PrpSleepMode(void)
       }
       else if(ModeMechanic_InputData.WakeUpSignal == 1)
       {
-          ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
+          MM_InitReq = MM_INIT_REQ_INITIALIZE;
+          ModeStateMechanic_ModeTransition(MM_INIT_MODE);
       }
       else
       {
@@ -184,6 +187,7 @@ static void ModeStateMechanic_SleepMode(void)
 static void ModeStateMechanic_FailureMode(void)
 {
     ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
+    ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
 }
 
 static uint8_t ModeStateMechanic_GetFaultSignal(void)

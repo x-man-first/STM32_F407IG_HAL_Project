@@ -34,6 +34,8 @@ targets:
         - BSW/SystemClock/include
         - BSW/TIM2/include
         - BSW/CAN/include
+        - BSW/PWM/include
+        - ASW/MotorControl/include
       libList: []
     excludeList: []
     toolchain: GCC

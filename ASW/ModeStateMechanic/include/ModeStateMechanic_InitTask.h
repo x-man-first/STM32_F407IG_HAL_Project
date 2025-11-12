@@ -18,8 +18,7 @@ typedef enum MM_InitStsType_
    MM_INIT_STS_INIT_PENDING     = 2u,
    MM_INIT_STS_INIT_FAILED      = 3u,
    MM_INIT_STS_DEINIT_PENDING   = 4u,
-   MM_INIT_STS_DEINIT_FAILED    = 6u,
-   MM_INIT_STS_DEINIT_COMPLETED = 7u
+   MM_INIT_STS_DEINIT_FAILED    = 5u
 } MM_InitStsType;
 
 typedef enum MM_InitStsIndexes_{
