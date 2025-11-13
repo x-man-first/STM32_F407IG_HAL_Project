@@ -23,6 +23,9 @@
 #include "SystemClock.h"
 #include "TIM2.h"
 #include "Can.h"
+#include "PWM.h"
+#include "MotorControl.h"
+#include "key.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -85,12 +88,13 @@ void MCU_Init(void)
 
   /* Initialize all configured peripherals */
   GPIO_Init();
-
   MX_TIM2_Init();
-
   CAN1_Init();
+  PWM_Init();
+  key_init();
 
   ModeStateMechanic_Init();
+  MotorControl_Init();
 }
 
 void MCU_Main(void)
@@ -100,6 +104,7 @@ void MCU_Main(void)
       Flag_1ms = 0; 
 
       ModeStateMechanic_Main();
+      MotorControl_Control();
   }
   if(Flag_10ms == 1)
   {

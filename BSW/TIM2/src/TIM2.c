@@ -142,4 +142,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     TIM2_Handler_IN_IRQ();
   }
+  if(htim == (&htim1))
+  {
+    TIM1_Handler_IN_IRQ();
+  }
 }

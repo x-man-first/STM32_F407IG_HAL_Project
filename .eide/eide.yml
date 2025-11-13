@@ -36,6 +36,7 @@ targets:
         - BSW/CAN/include
         - BSW/PWM/include
         - ASW/MotorControl/include
+        - ASW/KEY/include
       libList: []
     excludeList: []
     toolchain: GCC
