@@ -8,6 +8,7 @@ srcDirs:
   - Drivers
   - ASW
   - BSW
+  - CDD
 virtualFolder:
   name: <virtual_root>
   files: []
@@ -36,7 +37,8 @@ targets:
         - BSW/CAN/include
         - BSW/PWM/include
         - ASW/MotorControl/include
-        - ASW/KEY/include
+        - CDD/Hall/include
+        - CDD/KEY/include
       libList: []
     excludeList: []
     toolchain: GCC

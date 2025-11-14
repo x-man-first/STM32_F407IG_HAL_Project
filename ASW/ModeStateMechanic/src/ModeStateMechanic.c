@@ -25,6 +25,8 @@ static void ModeStateMechanic_PrpSleepMode(void);
 static void ModeStateMechanic_SleepMode(void);
 static void ModeStateMechanic_FailureMode(void);
 static uint8_t ModeStateMechanic_GetFaultSignal(void);
+static uint8_t ModeStateMechanic_GetInitStatus(void);
+static uint8_t ModeStateMechanic_GetDeInitStatus(void);
 
 // Add your function implementations below
 
@@ -106,11 +108,11 @@ static void ModeStateMechanic_InitMode(void)
 {
     MM_InitDeinit();
 
-    if(MM_InitSts[MM_INIT_TEST] == MM_INIT_STS_INITIALIZED)
+    if(ModeStateMechanic_GetInitStatus() == MM_INIT_STS_INITIALIZED)
     {
         ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
     }
-    else if(MM_InitSts[MM_INIT_TEST] == MM_INIT_STS_INIT_FAILED)
+    else if(ModeStateMechanic_GetInitStatus() == MM_INIT_STS_INIT_FAILED)
     {
         ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
     }
@@ -123,23 +125,24 @@ static void ModeStateMechanic_InitMode(void)
 static void ModeStateMechanic_StandbyMode(void)
 {
     ModeStateMechanic_ModeTransition(MM_TORQUECTRL_MODE);
-    ModeStateMechanic_ModeTransition(MM_SPEEDCTRL_MODE);
-    ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
-    ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
+    // ModeStateMechanic_ModeTransition(MM_SPEEDCTRL_MODE);
+    // ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
+    // ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
 }
 
 static void ModeStateMechanic_TorqueCtrlMode(void)
 {
-    ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
-    ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
-    ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
+    MotorControl_Control();
+    // ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
+    // ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
+    // ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
 }
 
 static void ModeStateMechanic_SpeedCtrlMode(void)
 {
     ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
-    ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
-    ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
+    // ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
+    // ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
 }
 
 static void ModeStateMechanic_PrpSleepMode(void)
@@ -147,15 +150,15 @@ static void ModeStateMechanic_PrpSleepMode(void)
     MM_InitReq = MM_INIT_REQ_DEINITIALIZE;
     MM_InitDeinit();
 
-    if(MM_InitSts[MM_INIT_TEST] == MM_INIT_STS_DEINITIALIZED)
+    if(ModeStateMechanic_GetDeInitStatus() == MM_INIT_STS_DEINITIALIZED)
     {
         ModeStateMechanic_ModeTransition(MM_SLEEP_MODE);
     }
-    else if(MM_InitSts[MM_INIT_TEST] == MM_INIT_STS_DEINIT_FAILED)
+    else if(ModeStateMechanic_GetDeInitStatus() == MM_INIT_STS_DEINIT_FAILED)
     {
         ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
     }
-    else if(MM_InitSts[MM_INIT_TEST] == MM_INIT_STS_DEINIT_PENDING)
+    else if(ModeStateMechanic_GetDeInitStatus() == MM_INIT_STS_DEINIT_PENDING)
     {
       if(ModeMechanic_InputData.FaultSignal == 1)
       {
@@ -193,4 +196,57 @@ static void ModeStateMechanic_FailureMode(void)
 static uint8_t ModeStateMechanic_GetFaultSignal(void)
 {
     return 0u; // Simulate no fault
+}
+
+static uint8_t ModeStateMechanic_GetInitStatus(void)
+{
+    uint8_t AllInitialized = MM_INIT_STS_INITIALIZED;
+
+    for(uint8_t i = 0; i < MM_INIT_NUM; i++)
+    {
+        if(MM_InitSts[i] == MM_INIT_STS_INIT_PENDING)
+        {
+            if(AllInitialized == MM_INIT_STS_INIT_FAILED)
+            {
+                // Do nothing, already failed
+            }
+            else
+            {
+                AllInitialized = MM_INIT_STS_INIT_PENDING;
+            }
+        }
+        else if(MM_InitSts[i] == MM_INIT_STS_INIT_FAILED)
+        {
+            AllInitialized = MM_INIT_STS_INIT_FAILED;
+        }
+    }
+
+    return AllInitialized;
+    
+}
+
+static uint8_t ModeStateMechanic_GetDeInitStatus(void)
+{
+    uint8_t AllDeInitialized = 1u;
+
+    for(uint8_t i = 0; i < MM_INIT_NUM; i++)
+    {
+        if(MM_InitSts[i] == MM_INIT_STS_INIT_PENDING)
+        {
+            if(AllDeInitialized == MM_INIT_STS_INIT_FAILED)
+            {
+                // Do nothing, already failed
+            }
+            else
+            {
+                AllDeInitialized = MM_INIT_STS_INIT_PENDING;
+            }
+        }
+        else if(MM_InitSts[i] == MM_INIT_STS_INIT_FAILED)
+        {
+            AllDeInitialized = MM_INIT_STS_INIT_FAILED;
+        }
+    }
+
+    return AllDeInitialized;
 }

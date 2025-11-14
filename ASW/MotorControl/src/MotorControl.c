@@ -17,7 +17,8 @@
 bldc_status_type bldc_status = {0};
 int16_t pwm_dy = 0;
 /* ======= Private function prototypes ======= */
-static uint32_t Hallsensor(void);
+static void MotorControl_Start(void);
+static void MotorControl_Stop(void);
 static void m1_uhvl(void);
 static void m1_uhwl(void);
 static void m1_vhul(void);
@@ -26,28 +27,35 @@ static void m1_whul(void);
 static void m1_whvl(void);
 
 /* ======= Public functions ======= */
-void MotorControl_Init(void);
-void MotorControl_Start(void);
-void MotorControl_Stop(void);
-void MotorControl_DeInit(void);
+uint8_t MotorControl_Init(void);
+uint8_t MotorControl_DeInit(void);
 void MotorControl_Control(void);
-void TIM1_Handler_IN_IRQ(void);
+void Motor_Handler_IN_TIM1IRQ(void);
 
 /**
  * @brief 
  * @param[in] 
  * @return 
  */
-void MotorControl_Init(void)
+uint8_t MotorControl_Init(void)
 {
-    MotorControl_Stop();
-    bldc_status.run_flag = STOP;
+    uint8_t MotorControl_Init_Status = 0;
+
+    SHUTDOWN_OFF;
+    HAL_GPIO_WritePin(M1_LOW_SIDE_U_PORT,M1_LOW_SIDE_U_PIN,GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(M1_LOW_SIDE_V_PORT,M1_LOW_SIDE_V_PIN,GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(M1_LOW_SIDE_W_PORT,M1_LOW_SIDE_W_PIN,GPIO_PIN_RESET);
+    PWM_Stop(&htim1);
+
+    MotorControl_Init_Status = 1;
+
+    return MotorControl_Init_Status;
 }
 
 /**
  * @brief 
  */
-void MotorControl_Start(void)
+static void MotorControl_Start(void)
 {
     SHUTDOWN_EN;
     HAL_GPIO_WritePin(M1_LOW_SIDE_U_PORT,M1_LOW_SIDE_U_PIN,GPIO_PIN_RESET);
@@ -59,7 +67,7 @@ void MotorControl_Start(void)
 /**
  * @brief 
  */
-void MotorControl_Stop(void)
+static void MotorControl_Stop(void)
 {
     SHUTDOWN_OFF;
     HAL_GPIO_WritePin(M1_LOW_SIDE_U_PORT,M1_LOW_SIDE_U_PIN,GPIO_PIN_RESET);
@@ -125,32 +133,20 @@ void MotorControl_Control(void)
 /**
  * @brief 
  */
-void MotorControl_DeInit(void)
+uint8_t MotorControl_DeInit(void)
 {
+    uint8_t MotorControl_DeInit_Status = 0;
 
-}
+    SHUTDOWN_OFF;
+    HAL_GPIO_WritePin(M1_LOW_SIDE_U_PORT,M1_LOW_SIDE_U_PIN,GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(M1_LOW_SIDE_V_PORT,M1_LOW_SIDE_V_PIN,GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(M1_LOW_SIDE_W_PORT,M1_LOW_SIDE_W_PIN,GPIO_PIN_RESET);
+    PWM_Stop(&htim1);
 
-/*
- * @brief       获取霍尔传感器引脚状态
- * @param       无
- * @retval      霍尔传感器引脚状态
- */
-static uint32_t Hallsensor(void)
-{
-    uint32_t state = 0;
-    if(HAL_GPIO_ReadPin(HALL1_TIM_CH1_GPIO,HALL1_TIM_CH1_PIN) != GPIO_PIN_RESET)
-    {
-        state |= 0x01;
-    }
-    if(HAL_GPIO_ReadPin(HALL1_TIM_CH2_GPIO,HALL1_TIM_CH2_PIN) != GPIO_PIN_RESET)
-    {
-        state |= 0x02;
-    }
-    if(HAL_GPIO_ReadPin(HALL1_TIM_CH3_GPIO,HALL1_TIM_CH3_PIN) != GPIO_PIN_RESET)
-    {
-        state |= 0x04;
-    }
-    return   state; 
+    MotorControl_DeInit_Status = 1;
+
+    return MotorControl_DeInit_Status;
+
 }
 
 
@@ -223,11 +219,11 @@ static void m1_whvl(void)
 }
 
 /**
- * @brief       定时器中断回调
+ * @brief       TIM1中断回调
  * @param       无
  * @retval      无
  */
-void TIM1_Handler_IN_IRQ(void)
+void Motor_Handler_IN_TIM1IRQ(void)
 {
         if(bldc_status.run_flag == RUN)
         {
@@ -260,6 +256,8 @@ void TIM1_Handler_IN_IRQ(void)
                         default : break;
                     }
                 }
+                bldc_status.step_last = bldc_status.step_sta;
+                bldc_status.step_sta = Hallsensor();
             }
         }else 
         {

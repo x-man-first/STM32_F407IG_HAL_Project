@@ -12,6 +12,11 @@ void MM_InitPending_Test(void);
 void MM_DeinitStart_Test(void);
 void MM_DeInitPending_Test(void);
 
+void MM_InitStart_MotorControl(void);
+void MM_InitPending_MotorControl(void);
+void MM_DeinitStart_MotorControl(void);
+void MM_DeInitPending_MotorControl(void);
+
 void MM_InitDeinit(void);
 
 static uint8_t MM_Test_Init(void);
@@ -19,10 +24,14 @@ static uint8_t MM_Test_DeInit(void);
 
 static const InitCfgType MM_InitCfg[MM_INIT_NUM] =
 {
-   { &MM_InitStart_Test,          &MM_InitPending_Test,    &MM_DeinitStart_Test,  &MM_DeInitPending_Test }
+   { &MM_InitStart_Test,          &MM_InitPending_Test,         &MM_DeinitStart_Test,         &MM_DeInitPending_Test },
+   { &MM_InitStart_MotorControl,  &MM_InitPending_MotorControl, &MM_DeinitStart_MotorControl, &MM_DeInitPending_MotorControl }
 };
 static uint16_t MM_Test_Init_TimeoutCtr = 0u;
 static uint16_t MM_Test_DeInit_TimeoutCtr = 0u;
+
+static uint16_t MM_MotorControl_Init_TimeoutCtr = 0u;
+static uint16_t MM_MotorControl_DeInit_TimeoutCtr = 0u;
 
 /* Public function implementations */
 void MM_InitStart_Test(void)
@@ -53,7 +62,6 @@ void MM_InitPending_Test(void)
    }
    
 }
-
 void MM_DeinitStart_Test(void)
 {
    // Simulate deinitialization process
@@ -61,7 +69,6 @@ void MM_DeinitStart_Test(void)
    MM_InitSts[MM_INIT_TEST] = MM_INIT_STS_DEINIT_PENDING;
 
 }
-
 void MM_DeInitPending_Test(void)
 {
    uint8_t deinitStatus = 0u;
@@ -90,6 +97,61 @@ static uint8_t MM_Test_Init(void)
 static uint8_t MM_Test_DeInit(void)
 {
     return 1u; // Simulate successful deinitialization
+}
+
+void MM_InitStart_MotorControl(void)
+{
+   // Simulate initialization process
+   MM_MotorControl_Init_TimeoutCtr = MM_MotorControl_INIT_TIMEROUTCOUNT;
+   MM_InitSts[MM_INIT_MOTORCONTROL] = MM_INIT_STS_INIT_PENDING;
+}
+void MM_InitPending_MotorControl(void)
+{
+   uint8_t initStatus = 0u;
+
+   initStatus = MotorControl_Init();
+
+    // Simulate checking initialization status
+   if(1 == initStatus)
+   {
+      // Simulate successful initialization
+      MM_InitSts[MM_INIT_MOTORCONTROL] = MM_INIT_STS_INITIALIZED;
+   } 
+   else if(0u == MM_MotorControl_Init_TimeoutCtr)
+   {
+      MM_InitSts[MM_INIT_MOTORCONTROL] = MM_INIT_STS_INIT_FAILED;
+   }
+   else
+   {
+      MM_MotorControl_Init_TimeoutCtr = MM_MotorControl_Init_TimeoutCtr - 1u;
+   }
+   
+}
+void MM_DeinitStart_MotorControl(void)
+{
+   // Simulate deinitialization process
+   MM_MotorControl_DeInit_TimeoutCtr = MM_MotorControl_DEINIT_TIMEROUTCOUNT;
+   MM_InitSts[MM_INIT_MOTORCONTROL] = MM_INIT_STS_DEINIT_PENDING;
+
+}
+void MM_DeInitPending_MotorControl(void)
+{
+   uint8_t deinitStatus = 0u;
+   deinitStatus = MotorControl_DeInit();
+    // Simulate checking deinitialization status
+   if(1 == deinitStatus)
+   {
+      // Simulate successful deinitialization
+      MM_InitSts[MM_INIT_MOTORCONTROL] = MM_INIT_STS_DEINITIALIZED;
+   } 
+   else if(0u == MM_MotorControl_DeInit_TimeoutCtr)
+   {
+      MM_InitSts[MM_INIT_MOTORCONTROL] = MM_INIT_STS_DEINIT_FAILED;
+   }
+   else
+   {
+      MM_MotorControl_DeInit_TimeoutCtr = MM_MotorControl_DeInit_TimeoutCtr - 1u;
+   }
 }
 
 void MM_InitDeinit(void)

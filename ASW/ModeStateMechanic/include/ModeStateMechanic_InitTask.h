@@ -7,9 +7,13 @@ extern "C" {
 
 // Includes
 #include "stm32f4xx_hal.h"
+#include "MotorControl.h"
 
 #define MM_Test_INIT_TIMEROUTCOUNT   2u //20ms
 #define MM_Test_DEINIT_TIMEROUTCOUNT 2u //20ms
+#define MM_MotorControl_INIT_TIMEROUTCOUNT   2u //20ms
+#define MM_MotorControl_DEINIT_TIMEROUTCOUNT 2u //20ms
+
 
 typedef enum MM_InitStsType_
 {
@@ -23,6 +27,7 @@ typedef enum MM_InitStsType_
 
 typedef enum MM_InitStsIndexes_{
     MM_INIT_TEST,
+    MM_INIT_MOTORCONTROL,
     /* Add new values before the last value */
     MM_INIT_NUM
 }MM_InitStsIndexes;
@@ -47,10 +52,6 @@ extern MM_InitStsType MM_InitSts[MM_INIT_NUM];
 extern MM_InitReqType MM_InitReq;
 
 // Function prototypes
-extern void MM_InitStart_Test(void);
-extern void MM_InitPending_Test(void);
-extern void MM_DeinitStart_Test(void);
-extern void MM_DeInitPending_Test(void);
 
 extern void MM_InitDeinit(void);
 

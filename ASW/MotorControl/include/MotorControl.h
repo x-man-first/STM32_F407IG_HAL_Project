@@ -9,6 +9,7 @@
 
 #include "PWM.h"
 #include "key.h"
+#include "Hall.h"
 
 /* 公共常量 */
 
@@ -19,15 +20,6 @@
 
 #define SHUTDOWN_EN                         HAL_GPIO_WritePin(SHUTDOWN_PIN_GPIO,SHUTDOWN_PIN,GPIO_PIN_SET);
 #define SHUTDOWN_OFF                        HAL_GPIO_WritePin(SHUTDOWN_PIN_GPIO,SHUTDOWN_PIN,GPIO_PIN_RESET);
-
-#define HALL1_TIM_CH1_PIN                   GPIO_PIN_10     /* HU */
-#define HALL1_TIM_CH1_GPIO                  GPIOH
-
-#define HALL1_TIM_CH2_PIN                   GPIO_PIN_11     /* HV */
-#define HALL1_TIM_CH2_GPIO                  GPIOH
-
-#define HALL1_TIM_CH3_PIN                   GPIO_PIN_12     /* HW */
-#define HALL1_TIM_CH3_GPIO                  GPIOH
 
 #define M1_LOW_SIDE_U_PORT                      GPIOB
 #define M1_LOW_SIDE_U_PIN                       GPIO_PIN_13
@@ -54,16 +46,12 @@ typedef struct {
 extern bldc_status_type bldc_status;
 
 /* 初始化与反初始化 */
-extern void MotorControl_Init(void);
-extern void MotorControl_DeInit(void);
-
-/* 启动/停止 */
-extern void MotorControl_Start(void);
-extern void MotorControl_Stop(void);
+extern uint8_t MotorControl_Init(void);
+extern uint8_t MotorControl_DeInit(void);
 
 extern void MotorControl_Control(void);
 
-extern void TIM1_Handler_IN_IRQ(void);
+extern void Motor_Handler_IN_TIM1IRQ(void);
 
 
 #endif /* MOTOR_CONTROL_H */

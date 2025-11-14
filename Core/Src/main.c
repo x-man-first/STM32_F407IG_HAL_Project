@@ -94,7 +94,6 @@ void MCU_Init(void)
   key_init();
 
   ModeStateMechanic_Init();
-  MotorControl_Init();
 }
 
 void MCU_Main(void)
@@ -104,7 +103,6 @@ void MCU_Main(void)
       Flag_1ms = 0; 
 
       ModeStateMechanic_Main();
-      MotorControl_Control();
   }
   if(Flag_10ms == 1)
   {
