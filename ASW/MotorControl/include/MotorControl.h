@@ -10,6 +10,7 @@
 #include "PWM.h"
 #include "key.h"
 #include "Hall.h"
+#include "MotorControl_Cfg.h"
 
 /* 公共常量 */
 
@@ -43,8 +44,14 @@ typedef struct {
     __IO uint16_t   pwm_duty;       /* 电机占空比 */
 } bldc_status_type;
 
-extern bldc_status_type bldc_status;
+typedef struct {
+    __IO uint8_t    start_stop;         /* 启动/停止状态 */
+    __IO uint8_t    CW_CCW;             /* 方向状态 */
+    __IO uint16_t   pwm_duty;       /* 电机占空比 */
+} Bldc_Control_Req_type;
 
+extern bldc_status_type bldc_status;
+extern Bldc_Control_Req_type Bldc_Control_Req;
 /* 初始化与反初始化 */
 extern uint8_t MotorControl_Init(void);
 extern uint8_t MotorControl_DeInit(void);

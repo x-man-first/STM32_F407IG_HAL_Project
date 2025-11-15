@@ -3,15 +3,21 @@
 
 CAN_HandleTypeDef hcan1;
 
+static CAN_Status_Type CAN_Status = CAN_Ok;
 //接收到的数据储存到下面的变量中
-volatile uint32_t CAN_Data[2];
+static ReceiveData_Type CANRX_Data = {0};
+static CAN_TX_Status_Type CAN_TX_State = CAN_TX_Ok;
+static CAN_RX_Status_Type CAN_RX_State = CAN_RX_Ok;
+
 
 void CAN1_Init(void);
 void CAN1TX(void);
+CAN_Status_Type Get_CAN_Status(void); 
 
 static void CAN_Filter_config(void);
-static uint8_t can_send_msg(uint32_t id, uint8_t *msg, uint8_t len);
-static uint8_t can_receive_msg(uint32_t id, uint8_t *buf);
+static CAN_TX_Status_Type can_send_msg(uint32_t id, uint8_t *msg, uint8_t len);
+static CAN_RX_Status_Type can_receive_msg(ReceiveData_Type *rx_data);
+static void CAN_RX_Handle(void);
 
 /**
   * @brief CAN1 Initialization Function
@@ -55,7 +61,7 @@ void CAN1_Init(void)
 void CAN1TX(void)
 {
     uint8_t tx_data[8] = {0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA};
-    can_send_msg(0x123, tx_data, 8);
+    CAN_TX_State = can_send_msg(CANID_SYNC, tx_data, 8);
 }
 
 
@@ -92,11 +98,12 @@ static void CAN_Filter_config(void)
  * @param       len     : 数据长度
  * @retval      发送状态 0, 成功; 1, 失败;
  */
-static uint8_t can_send_msg(uint32_t id, uint8_t *msg, uint8_t len)
+static CAN_TX_Status_Type can_send_msg(uint32_t id, uint8_t *msg, uint8_t len)
 {
     uint16_t t = 0;
     uint32_t TxMailbox = CAN_TX_MAILBOX0;
     CAN_TxHeaderTypeDef can_tx_handle;
+    CAN_TX_Status_Type CAN_TX_Status = CAN_TX_Ok;
 
     can_tx_handle.StdId = id;         /* 标准标识符 */
     can_tx_handle.ExtId = id;         /* 扩展标识符(29位) */
@@ -106,7 +113,7 @@ static uint8_t can_send_msg(uint32_t id, uint8_t *msg, uint8_t len)
  
     if (HAL_CAN_AddTxMessage(&hcan1 , &can_tx_handle, msg, &TxMailbox) != HAL_OK) /* 发送消息 */
     {
-        return 1;
+        CAN_TX_Status =  CAN_TX_Notok;
     }
     
     while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) != 3)   /* 等待发送完成,所有邮箱为空 */
@@ -116,11 +123,11 @@ static uint8_t can_send_msg(uint32_t id, uint8_t *msg, uint8_t len)
         if (t > 0xFFF)
         {
             HAL_CAN_AbortTxRequest(&hcan1, TxMailbox);     /* 超时，直接中止邮箱的发送请求 */
-            return 1;
+            CAN_TX_Status =  CAN_TX_Notok;
         }
     }
     
-    return 0;
+    return CAN_TX_Status;
 }
 
 /**
@@ -132,26 +139,31 @@ static uint8_t can_send_msg(uint32_t id, uint8_t *msg, uint8_t len)
  * @arg         0   , 无数据被接收到;
  * @arg         其他, 接收的数据长度
  */
-static uint8_t can_receive_msg(uint32_t id, uint8_t *buf)
+static CAN_RX_Status_Type can_receive_msg(ReceiveData_Type *rx_data)
 {
     CAN_RxHeaderTypeDef can_rx_handle;
+    CAN_RX_Status_Type CAN_RX_Status = CAN_RX_Ok;
 
-    if (HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0) == 0)     /* 没有接收到数据 */
+    if (HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0) == 1)
     {
-        return 0;
+        rx_data->Fifo_Source = CAN_RXFifo0;
+    }
+    else if (HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO1) == 1)
+    {
+        rx_data->Fifo_Source = CAN_RXFifo1;
+    }
+    else
+    {
+        CAN_RX_Status =  CAN_RX_Notok;
     }
  
-    if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &can_rx_handle, buf) != HAL_OK)  /* 读取数据 */
+    if (HAL_CAN_GetRxMessage(&hcan1, rx_data->Fifo_Source, &can_rx_handle, (uint8_t *)rx_data->Data) != HAL_OK)  /* 读取数据 */
     {
-        return 0;
+        CAN_RX_Status = CAN_RX_Notok;
     }
+    rx_data->ID = can_rx_handle.StdId;
  
-    if (can_rx_handle.StdId!= id || can_rx_handle.IDE != CAN_ID_STD || can_rx_handle.RTR != CAN_RTR_DATA)       /* 接收到的ID不对 / 不是标准帧 / 不是数据帧 */
-    {
-        return 0;    
-    }
- 
-    return can_rx_handle.DLC;
+    return CAN_RX_Status;
 
 }
 
@@ -159,7 +171,31 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
   if (hcan == (&hcan1))
   {
-    (void)can_receive_msg(0x456, (uint8_t *)CAN_Data);
+    CAN_RX_State = can_receive_msg(&CANRX_Data);
   }
+  CAN_RX_Handle();
+}
 
+CAN_Status_Type Get_CAN_Status(void)
+{
+    if(CAN_TX_State == CAN_TX_Notok || CAN_RX_State == CAN_RX_Notok)
+    {
+        CAN_Status = CAN_Notok;
+    }
+    else
+    {
+        CAN_Status = CAN_Ok;
+    }
+    
+    return CAN_Status;
+}
+
+static void CAN_RX_Handle(void)
+{
+    if(CANRX_Data.ID == CANID_VCU_CMD)
+    {
+        Bldc_Control_Req.start_stop = (CANRX_Data.Data[0]&0x00000001);
+        Bldc_Control_Req.CW_CCW = ((CANRX_Data.Data[0]&0x00000002)>>1);
+        Bldc_Control_Req.pwm_duty = (uint16_t)((CANRX_Data.Data[0]&0x00FFFF00)>>8);
+    }
 }

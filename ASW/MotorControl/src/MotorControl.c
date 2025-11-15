@@ -15,6 +15,7 @@
 
 /* ======= Private variables ======= */
 bldc_status_type bldc_status = {0};
+Bldc_Control_Req_type Bldc_Control_Req = {0};
 int16_t pwm_dy = 0;
 /* ======= Private function prototypes ======= */
 static void MotorControl_Start(void);
@@ -78,6 +79,7 @@ static void MotorControl_Stop(void)
 
 void MotorControl_Control(void)
 {
+#if USE_KEY_CONTROL
     uint8_t key = 0;
     
     key = key_scan(0);
@@ -128,6 +130,62 @@ void MotorControl_Control(void)
         bldc_status.pwm_duty = 0;
         pwm_dy = 0;
     }
+#endif
+#if USE_CAN_CONTROL
+    uint16_t PWM_DutyCycle = 0;
+    uint8_t  PWM_Changed = 0;
+    uint8_t  dir = 0;
+    uint8_t  dir_changed = 0;
+    if(Bldc_Control_Req.start_stop == 0x01)                  /* 启动电机 */
+    {
+        PWM_DutyCycle = Bldc_Control_Req.pwm_duty;
+        if(Bldc_Control_Req.CW_CCW == 0x00)          /* 正转 */
+        {
+            dir = CW;
+        }
+        if(Bldc_Control_Req.CW_CCW == 0x01)          /* 反转 */
+        {
+            dir = CCW;
+        }
+
+        if(PWM_DutyCycle != bldc_status.pwm_duty)
+        {
+            PWM_Changed = 1;
+        }
+        if(dir != bldc_status.dir)
+        {
+            dir_changed = 1;
+        }
+
+        if(PWM_Changed || dir_changed)
+        {
+            if(PWM_DutyCycle >= MC_DEFAULT_PWM_MAX)
+            {
+                PWM_DutyCycle =  MC_DEFAULT_PWM_MAX;
+            }
+
+            if(dir == CW)          /* 正转 */
+            {
+                bldc_status.dir = CW;
+                bldc_status.pwm_duty = PWM_DutyCycle;
+            }
+            else if(dir == CCW)          /* 反转 */
+            {
+                bldc_status.dir = CCW;
+                bldc_status.pwm_duty = PWM_DutyCycle;
+            }
+
+            MotorControl_Start();
+            bldc_status.run_flag = RUN;
+        }
+    }
+    else if(Bldc_Control_Req.start_stop == 0x00)             /* 停止电机 */
+    {
+        MotorControl_Stop();
+        bldc_status.run_flag = STOP;
+        bldc_status.pwm_duty = 0;
+    }
+#endif
 }
 
 /**

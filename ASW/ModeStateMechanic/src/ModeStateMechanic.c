@@ -19,7 +19,7 @@ static void ModeStateMechanic_ModeControl(void);
 static void ModeStateMechanic_ModeTransition(MM_ModeType newMode);
 static void ModeStateMechanic_InitMode(void);
 static void ModeStateMechanic_StandbyMode(void);
-static void ModeStateMechanic_TorqueCtrlMode(void);
+static void ModeStateMechanic_MotorCtrlMode(void);
 static void ModeStateMechanic_SpeedCtrlMode(void);
 static void ModeStateMechanic_PrpSleepMode(void);
 static void ModeStateMechanic_SleepMode(void);
@@ -76,8 +76,8 @@ static void ModeStateMechanic_ModeControl(void)
         case MM_STANDBY_MODE:
             ModeStateMechanic_StandbyMode();
             break;
-        case MM_TORQUECTRL_MODE:
-            ModeStateMechanic_TorqueCtrlMode();
+        case MM_MOTORCTRL_MODE:
+            ModeStateMechanic_MotorCtrlMode();
             break;
         case MM_SPEEDCTRL_MODE:
             ModeStateMechanic_SpeedCtrlMode();
@@ -112,7 +112,8 @@ static void ModeStateMechanic_InitMode(void)
     {
         ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
     }
-    else if(ModeStateMechanic_GetInitStatus() == MM_INIT_STS_INIT_FAILED)
+    else if((ModeStateMechanic_GetInitStatus() == MM_INIT_STS_INIT_FAILED)
+        || (ModeMechanic_InputData.FaultSignal == 1))
     {
         ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
     }
@@ -124,13 +125,13 @@ static void ModeStateMechanic_InitMode(void)
 
 static void ModeStateMechanic_StandbyMode(void)
 {
-    ModeStateMechanic_ModeTransition(MM_TORQUECTRL_MODE);
+    ModeStateMechanic_ModeTransition(MM_MOTORCTRL_MODE);
     // ModeStateMechanic_ModeTransition(MM_SPEEDCTRL_MODE);
     // ModeStateMechanic_ModeTransition(MM_PRPSLEEP_MODE);
     // ModeStateMechanic_ModeTransition(MM_FAILURE_MODE);
 }
 
-static void ModeStateMechanic_TorqueCtrlMode(void)
+static void ModeStateMechanic_MotorCtrlMode(void)
 {
     MotorControl_Control();
     // ModeStateMechanic_ModeTransition(MM_STANDBY_MODE);
@@ -195,7 +196,21 @@ static void ModeStateMechanic_FailureMode(void)
 
 static uint8_t ModeStateMechanic_GetFaultSignal(void)
 {
-    return 0u; // Simulate no fault
+    uint8_t faultSignal = 0u;// 0: no fault, 1: fault
+    CAN_Status_Type canStatus = CAN_Ok;
+
+    canStatus = Get_CAN_Status();
+
+    if(canStatus == CAN_Notok)
+    {
+        faultSignal = 1u;
+    }
+    else
+    {
+        faultSignal = 0u;
+    }
+
+    return faultSignal;
 }
 
 static uint8_t ModeStateMechanic_GetInitStatus(void)
